@@ -185,6 +185,15 @@ app.post('/api/enquiries', async (req, res) => {
   res.status(201).json(newEnquiry);
 });
 
+// --- PRODUCTION FRONTEND SERVING ---
+const DIST_DIR = path.join(ROOT_DIR, 'dist');
+app.use(express.static(DIST_DIR));
+
+// Catch-all route to serve the frontend index.html for any non-API route
+app.get('*', (req, res) => {
+  res.sendFile(path.join(DIST_DIR, 'index.html'));
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
