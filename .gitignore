@@ -1,0 +1,13 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Local Data (Crucial for security)
+backend/data/db.json
+backend/data/enquiries.xlsx
+uploads/
