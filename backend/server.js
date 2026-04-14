@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const SECRET_KEY = 'your-secret-key'; // In production, use .env
+const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key'; // Uses environment variable if available
 
 // Systematic Paths - Pointing to root directories
 const ROOT_DIR = path.join(__dirname, '..');
