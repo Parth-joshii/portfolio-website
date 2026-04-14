@@ -48,11 +48,11 @@ export default function Navbar({ user, isAdmin, onLogin, onLogout }: NavbarProps
       if (response.ok) {
         onLogin(data.user, data.token);
       } else {
-        alert(data.error || "Login failed");
+        alert("Login failed: " + (data.error || "Incorrect email or password"));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed:", error);
-      alert("System error during login");
+      alert("System error: Could not connect to the server. Please check your internet or wait for the server to wake up.");
     }
   };
 

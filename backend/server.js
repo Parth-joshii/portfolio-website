@@ -45,24 +45,48 @@ const authenticate = (req, res, next) => {
 
 // --- ROUTES ---
 
+// Health Check
+app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
+
 // Auth
 app.post('/api/auth/login', async (req, res) => {
-  let { email, password } = req.body;
-  email = email?.trim();
-  password = password?.trim();
-  
-  const db = await readDB();
-  const user = db.users.find(u => u.email === email);
-  
-  if (user) {
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (isMatch) {
-      const token = jwt.sign({ id: user.id, email: user.email, role: 'admin' }, SECRET_KEY, { expiresIn: '24h' });
-      return res.json({ token, user: { email: user.email, role: 'admin' } });
+  try {
+    let { email, password } = req.body;
+    email = email?.trim();
+    password = password?.trim();
+    
+    let db = await readDB();
+    
+    // SEED: If no users exist, create a default admin
+    if (!db.users || db.users.length === 0) {
+      console.log('No users found in DB. Seeding default admin...');
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const defaultAdmin = {
+        id: 1,
+        email: 'parthjoshi1605@gmail.com',
+        password: hashedPassword,
+        role: 'admin'
+      };
+      db.users = [defaultAdmin];
+      await writeDB(db);
+      console.log('Default admin seeded successfully.');
     }
+
+    const user = db.users.find(u => u.email === email);
+    
+    if (user) {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (isMatch) {
+        const token = jwt.sign({ id: user.id, email: user.email, role: 'admin' }, SECRET_KEY, { expiresIn: '24h' });
+        return res.json({ token, user: { email: user.email, role: 'admin' } });
+      }
+    }
+    
+    res.status(401).json({ error: 'Invalid credentials' });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Internal server error during login' });
   }
-  
-  res.status(401).json({ error: 'Invalid credentials' });
 });
 
 // Videos
